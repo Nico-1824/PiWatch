@@ -39,6 +39,10 @@ function init() {
             case "weather_update": // if a weather update is recieved from the server, update it
                 updateWeather(data["weather"], data["temp"]);
                 break;
+            case "chat_history":
+                for (let message of data["chat_history"]) {
+                    displayUserMessage(message);
+                }
             default:
                 console.log("Unknown message type" + data["type"]);
         }
@@ -106,6 +110,7 @@ function displayUserMessage(message) {
     bubble.textContent = message;
     chatMessage.appendChild(bubble);
     chatBox[0].appendChild(chatMessage);
+    chatBox[0].scrollTop = chatBox[0].scrollHeight;
 }
 
 
@@ -127,6 +132,7 @@ function displayMessage(message) {
     bubble.textContent = message;
     chatMessage.appendChild(bubble);
     chatBox[0].appendChild(chatMessage);
+    chatBox[0].scrollTop = chatBox[0].scrollHeight;
 }
 
 

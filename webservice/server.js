@@ -49,11 +49,17 @@ let trafficData = -1;
 let weatherData = "Unavailable look outside";
 let weatherTemp = "Unavailable put your finger out the window";
 
+
+
+// checkForUpdates() -> void
+// This function will check for updates from the flask server and if there are any then we send them out to clients
+
+
 async function checkForUpdates() {
 
     try {
         // get traffic data from flask
-        const trafficResponse = await fetch('http://localhost:8000/traffic');
+        const trafficResponse = await fetch('http://flask:8000/traffic');
         if(!trafficResponse.ok) {
             throw new Error("Failed to get traffic data");
         }
@@ -68,7 +74,7 @@ async function checkForUpdates() {
         }
 
         // get weather data from flask
-        const weatherResponse = await fetch("http://localhost:8000/weather");
+        const weatherResponse = await fetch("http://flask:8000/weather");
         if(!weatherResponse.ok) {
             throw new Error("Failed to get weather data");
         }
@@ -127,6 +133,8 @@ function broadcast(data, socketToOmit) {
 //////////////////////////////////////////////////
 const ws = new WebSocket.Server({ server });
 
+let chatHistory = [];
+
 ws.on('connection', (socket, req) => {
     console.log(`New client connected: ${req.socket.remoteAddress}`);
 
@@ -140,7 +148,7 @@ ws.on('connection', (socket, req) => {
                 const weatherMessage = {
                     "type": "weather_update",
                     "weather": weatherData,
-                    "temp": weatherTemp
+                    "temp": weatherTemp,
                 }
                 socket.send(JSON.stringify(weatherMessage));
                 const trafficMessage = {
@@ -148,9 +156,15 @@ ws.on('connection', (socket, req) => {
                     "traffic_index": trafficData
                 }
                 socket.send(JSON.stringify(trafficMessage));
+                const chatHistoryMessages = {
+                    "type": "chat_history",
+                    "chat_history": chatHistory
+                }
+                socket.send(JSON.stringify(chatHistoryMessages));
                 break;
             case "chat_message":
                 console.log(`Got a chat message from client: ${data["message"]}`)
+                chatHistory.push(data["message"]);
                 broadcast(data, socket);
                 break;
         }
