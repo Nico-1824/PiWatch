@@ -9,27 +9,27 @@ on:
   pull_request:
     branches: [ main ]
 
-  jobs:
+jobs:
 
-    build:
-      runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-      steps:
-        - uses: actions/checkout@v4
-        - name: Build and start services
-          run: docker compose up -d --build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start services
+        run: docker compose up -d --build
 
-        - name: Wait for services 
-          run: sleep 20
+      - name: Wait for services 
+        run: sleep 20
 
-        - name: Install Node Dependencies
-          run: npm install
+      - name: Install Node Dependencies
+        run: npm install
 
-        - name: Run Playwright tests
-          run: npx playwright test
+      - name: Run Playwright tests
+        run: npx playwright test
 
-        - name: Run PyTest tests
-          run: docker compose exec -T flask pytest
+      - name: Run PyTest tests
+        run: docker compose exec -T flask pytest
 
-        - name: Stop and shutdown
-          run: docker compose down
+      - name: Stop and shutdown
+        run: docker compose down
