@@ -16,7 +16,7 @@ jobs:
 
     env:
       OPEN_WEATHER_API_KEY: ${{ secrets.OPEN_WEATHER_API_KEY }}
-      TRAFFIC_API_KEY: ${{ secrets.TOM_TOM_API_KEY }}
+      TOM_TOM_API_KEY : ${{ secrets.TOM_TOM_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
