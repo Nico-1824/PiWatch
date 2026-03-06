@@ -16,6 +16,10 @@ def getWeather():
 
     try:
         response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPEN_WEATHER_API}", auth=('user', 'pass'))
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to get weather data: {response.status_code}")
+
         data = response.json()
         weather, temp = data["weather"][0]["main"], data["main"]["temp"]
         return {"weather":weather, "temp": int((temp - 273.15) * (9/5) + 32)}

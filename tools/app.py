@@ -5,12 +5,12 @@ from weather import getWeather
 app = Flask(__name__)
 
 @app.route("/traffic")
-def getTraffic():
+def get_traffic():
     traffic = check_traffic()
     return {"traffic_index": traffic}
 
 @app.route("/weather")
-def get_weathre():
+def get_weather():
     weather = getWeather()
     return weather
 

@@ -31,8 +31,16 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
+      - name: Setup Python to run PyTests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+        
+      - name: install python deps
+        run: pip install -r requirements.txt
+      
       - name: Run PyTest tests
-        run: docker compose exec -T flask pytest
+        run: pytest
 
       - name: Stop and shutdown
         run: docker compose down
