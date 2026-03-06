@@ -17,6 +17,10 @@ def check_traffic():
 
     try:
         response = requests.get(url)
+        if response.status_code != 200:
+            raise Exception(f"API call failed with status code {response.status_code}")
+
+
         data = response.json()
         accidentCount = 0
         trafficServerity = 0
