@@ -98,6 +98,17 @@ checkForUpdates();
 setInterval(checkForUpdates, 60 * 60 * 1000);
 
 
+async function canSummarize() {
+    if (sinceLastSummary > 100) {
+        const summaryResponse = await fetch("http://flask:8000/summarize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_history: chatHistory }),
+        })
+    }
+}
+
+
 
 
 
@@ -134,6 +145,7 @@ function broadcast(data, socketToOmit) {
 const ws = new WebSocket.Server({ server });
 
 let chatHistory = [];
+let sinceLastSummary = 0;
 
 ws.on('connection', (socket, req) => {
     console.log(`New client connected: ${req.socket.remoteAddress}`);
@@ -165,6 +177,7 @@ ws.on('connection', (socket, req) => {
             case "chat_message":
                 console.log(`Got a chat message from client: ${data["message"]}`)
                 chatHistory.push(data["message"]);
+                sinceLastSummary++;
                 broadcast(data, socket);
                 break;
         }
