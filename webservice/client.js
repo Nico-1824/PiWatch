@@ -5,6 +5,8 @@ let wsClient;
 // INIT FUNCTION TO START THE WEBSOCKET
 //////////////////////////
 
+let latestSummary = "";
+
 function init() {
 
     // check if the client is open and if so close it
@@ -39,10 +41,9 @@ function init() {
             case "weather_update": // if a weather update is recieved from the server, update it
                 updateWeather(data["weather"], data["temp"]);
                 break;
-            case "chat_history":
-                for (let message of data["chat_history"]) {
-                    displayUserMessage(message);
-                }
+            case "summary":
+                latestSummary = data["summary"];
+                
             default:
                 console.log("Unknown message type" + data["type"]);
         }
@@ -205,6 +206,33 @@ function updateWeather(weather, temp) {
 
 
 
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+const modal = document.getElementById('summary-modal');
+const summaryText = document.getElementById('summary-text');
+
+// Open
+document.getElementById('summary-btn').addEventListener('click', () => {
+  summaryText.textContent = latestSummary;
+  modal.classList.remove('hidden');
+});
+
+// Close via X button
+document.getElementById('modal-close').addEventListener('click', () => {
+  modal.classList.add('hidden');
+});
+
+// Close by clicking the dark overlay outside the box
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) modal.classList.add('hidden');
+});
+
+// Close with Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') modal.classList.add('hidden');
+});
 
 
 

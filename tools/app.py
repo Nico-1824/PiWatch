@@ -22,7 +22,7 @@ def get_weather():
 @app.route("/summarize", methods=["POST"])
 def summarize_chat():
     data = request.get_json()
-    print(json.dump(data, indent=4))
+    # print(json.dump(data, indent=4))
     chatHistory = data["chat_history"]
     summary = get_summary(chatHistory)
     return {"summary": summary}
