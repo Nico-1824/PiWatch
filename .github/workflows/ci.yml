@@ -22,7 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build and start services
-        run: docker compose up -d --build
+        run: |
+          docker compose up -d --build
+          docker logs flask
+          docker logs webservice
 
       - name: Wait for services 
         run: sleep 20
