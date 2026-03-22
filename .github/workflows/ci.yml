@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build and start services
-        run: docker compose up -d --build || true
+        run: docker compose up -d --build
 
       - name: Show Flask crash logs
         run: docker compose logs flask
@@ -37,7 +37,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --project="chromium"
 
       - name: Setup Python to run PyTests
         uses: actions/setup-python@v5
