@@ -1,6 +1,10 @@
 services:
   flask:
     build: ./tools
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPEN_WEATHER_API_KEY=${OPEN_WEATHER_API_KEY}
+      - TOM_TOM_API_KEY=${TOM_TOM_API_KEY}
     container_name: flask
     ports:
       - "8000:8000"
