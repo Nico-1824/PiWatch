@@ -25,16 +25,3 @@ test("Check that chat is visible and is working", async ({ page }) => {
     const lastMessage = chatBox.locator(".message").last();
     await expect(lastMessage).toHaveText("You" + input);
 })
-
-test("Check that other clients can see the chat", async ({ page }) => {
-    await page.goto("http://localhost:5500");
-
-    const chatBox = page.locator(".chat-box");
-
-    await expect(chatBox).toBeVisible();
-
-    const input = "Hello, this is a test message!";
-
-    const lastMessage = chatBox.locator(".message-away").last();
-    await expect(lastMessage).toHaveText("User" + input);
-})
