@@ -25,3 +25,5 @@ class TestPiWatch:
         result = getWeather()
         os.environ["OPEN_WEATHER_API_KEY"] = api_backup
         assert result["weather"] == "Unavailable look outside" and result["temp"] == "Unavailable put your finger out the window"
+
+    
