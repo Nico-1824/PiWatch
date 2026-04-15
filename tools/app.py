@@ -8,7 +8,7 @@ from notifier import notify_weather, notify_traffic, send_startup_report, notify
 app = Flask(__name__)
 
 @app.route("/traffic")
-def getTraffic():
+def get_traffic():
     traffic = check_traffic()
     notify_traffic(traffic)
     return {"traffic_index": traffic}

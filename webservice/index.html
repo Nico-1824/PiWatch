@@ -31,7 +31,21 @@
                     <input type="text" placeholder="Start chatting here..."/>
                 </form>
             </div>
+            <button id="summary-btn">View Summary</button>
         </main>
+
+
+        <div id="summary-modal" class="modal-overlay hidden">
+            <div class="modal-box">
+                <div class="modal-header">
+                <h2>Chat Summary</h2>
+                <button id="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                <p id="summary-text">Loading...</p>
+                </div>
+            </div>
+        </div>
 
     </body>
 
