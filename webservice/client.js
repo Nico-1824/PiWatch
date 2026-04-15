@@ -1,15 +1,13 @@
 // This will be the client websocket recieving from the server
 let wsClient;
+let latestSummary = "";
 
 //////////////////////////
 // INIT FUNCTION TO START THE WEBSOCKET
 //////////////////////////
 
-let latestSummary = "";
-
 function init() {
 
-    // check if the client is open and if so close it
     if(wsClient) {
         wsClient.onerror = wsClient.onopen = wsClient.onclose = null;
         wsClient.close();
@@ -20,85 +18,64 @@ function init() {
 
     wsClient.onopen = () => {
         const response = {
-            "type":"client_connected",
-            "message":"Client connected successfully",
+            "type": "client_connected",
+            "message": "Client connected successfully",
         }
         wsClient.send(JSON.stringify(response));
     }
 
     wsClient.onmessage = (messageEvent) => {
-        // Recieve info from the server
         const data = JSON.parse(messageEvent.data);
         console.log("GOT A MESSAGE FROM SERVER")
 
         switch (data["type"]) {
-            case "chat_message": // if a message is recieved from the server, display it
+            case "chat_message":
                 displayUserMessage(data["message"]);
                 break;
-            case "traffic_update": // if a traffic update is recieved from the server, update it
+            case "traffic_update":
                 updateTraffic(data["traffic_index"]);
                 break;
-            case "weather_update": // if a weather update is recieved from the server, update it
+            case "weather_update":
                 updateWeather(data["weather"], data["temp"]);
                 break;
             case "summary":
                 latestSummary = data["summary"];
-                
+                break;
             default:
-                console.log("Unknown message type" + data["type"]);
+                console.log("Unknown message type: " + data["type"]);
         }
     }
 
-    wsClient.onclose = (event) => {
-        wsClient = null;
-    }
-
+    wsClient.onclose = () => { wsClient = null; }
     wsClient.onerror = (event) => {
         console.error("Websocket error: " + event);
         wsClient = null;
     }
 }
 
-
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// MAIN LOGIC BELOW FOR CLIENT ///////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-const textForm = document.getElementsByClassName("chat-input")
-const chatBox = document.getElementsByClassName("chat-box");
-
-
-// Handle the chat form for the shat room
-// will recieve messages and send them to the server to be sent to other clients
-//
+const textForm = document.getElementsByClassName("chat-input");
+const chatBox  = document.getElementsByClassName("chat-box");
 
 textForm[0].addEventListener("submit", (event) => {
     event.preventDefault();
-
     const message = textForm[0].querySelector("input").value;
+    if (!message.trim()) return;
 
     displayMessage(message);
 
-    const response = {
+    wsClient.send(JSON.stringify({
         "type": "chat_message",
         "message": message
-    }
-    wsClient.send(JSON.stringify(response));
+    }));
 
     textForm[0].querySelector("input").value = "";
-})
+});
 
-
-
-// displayUserMessage(message) => void
-// +message is a string that is recieved by the server from other clients
-// will update the chat room and add chat bubbles containing messages from other people
-
+// ─── Display incoming message ───────────────────────────────────
 function displayUserMessage(message) {
     const chatMessage = document.createElement("div");
     chatMessage.className = "message-away";
@@ -114,13 +91,7 @@ function displayUserMessage(message) {
     chatBox[0].scrollTop = chatBox[0].scrollHeight;
 }
 
-
-
-
-// displayMessage(message) => void
-// +message is a string that the client is sending to the server
-// will update the chat room and add chat bubbles containing the message the client sent
-
+// ─── Display own message ────────────────────────────────────────
 function displayMessage(message) {
     const chatMessage = document.createElement("div");
     chatMessage.className = "message";
@@ -136,121 +107,130 @@ function displayMessage(message) {
     chatBox[0].scrollTop = chatBox[0].scrollHeight;
 }
 
-
-
-
-
-// updateTraffic(trafficIndex) => void
-// +trafficIndex is a number that is recieved by the server from traffic api and means the traffic level has changed
-// will update the traffic info card on all clients with new traffic level
-
+// ─── Update traffic card ────────────────────────────────────────
 function updateTraffic(trafficIndex) {
     const scrollView = document.getElementsByClassName("scroll-view")[0];
-    let trafficLevel = null;
+
+    let trafficLevel, icon;
     switch(trafficIndex) {
-        case -1:
-            trafficLevel = "Unavailable"
-            break;
-        case 0:
-            trafficLevel = "Low";
-            break;
-        case 1:
-            trafficLevel = "Moderate";
-            break;
-        case 2:
-            trafficLevel = "Heavy";
-            break;
-        default:
-            trafficLevel = "Stand Still";
-            break;
+        case -1: trafficLevel = "Unavailable"; icon = "—"; break;
+        case  0: trafficLevel = "Clear";       icon = "🟢"; break;
+        case  1: trafficLevel = "Light";       icon = "🟡"; break;
+        case  2: trafficLevel = "Heavy";       icon = "🟠"; break;
+        default: trafficLevel = "Stand Still"; icon = "🔴"; break;
     }
 
     if (document.getElementsByClassName("data-card-traffic").length > 0) {
-        const trafficCard = document.getElementsByClassName("data-card-traffic")[0];
-        trafficCard.innerHTML = `<h2> Traffic </h2><p> Traffic level: ${trafficLevel}</p>`;
+        document.getElementsByClassName("data-card-traffic")[0].innerHTML =
+            `<h2>🚗 Traffic</h2><p>${icon} ${trafficLevel}</p>`;
         return;
     }
 
-    const trafficCard = document.createElement("div");
-    trafficCard.className = "data-card-traffic";
-    trafficCard.innerHTML = `<h2> Traffic </h2><p> Traffic level: ${trafficLevel}</p>`;
-    scrollView.appendChild(trafficCard);
+    const card = document.createElement("div");
+    card.className = "data-card-traffic";
+    card.innerHTML = `<h2>🚗 Traffic</h2><p>${icon} ${trafficLevel}</p>`;
+    scrollView.appendChild(card);
 }
 
-
-
-
-
-
-
-// updateWeather(weather, temp) => void
-// +weather is a string that is recieved from the server from the weather api and indicates the weather conditions such as sunny, rainy, etc.
-// + temp is a number that indicated the temperature in F that is recieved from the server
-// will update the weather info card all all clients with the new information recieved
-
+// ─── Update weather card ────────────────────────────────────────
 function updateWeather(weather, temp) {
     const scrollView = document.getElementsByClassName("scroll-view")[0];
 
-    if (document.getElementsByClassName("data-card-traffic").length > 0) {
-        const weatherCard = document.getElementsByClassName("data-card-weather")[0];
-        weatherCard.innerHTML = `<h2> Weather </h2><p> Weather: ${weather}</p><p> Temp: ${temp}</p>`;
+    const weatherIcons = {
+        Clear: "☀️", Clouds: "☁️", Rain: "🌧️",
+        Drizzle: "🌦️", Thunderstorm: "⛈️", Snow: "❄️",
+        Mist: "🌫️", Fog: "🌫️"
+    };
+    const icon = weatherIcons[weather] || "🌡️";
+
+    if (document.getElementsByClassName("data-card-weather").length > 0) {
+        document.getElementsByClassName("data-card-weather")[0].innerHTML =
+            `<h2>🌤 Weather</h2><p>${icon} ${weather}</p><p>🌡 ${temp}°F</p>`;
         return;
     }
 
-    const weatherCard = document.createElement("div");
-    weatherCard.className = "data-card-weather";
-    weatherCard.innerHTML = `<h2> Weather </h2><p> Weather: ${weather}</p><p> Temp: ${temp}</p>`;
-    scrollView.appendChild(weatherCard);
+    const card = document.createElement("div");
+    card.className = "data-card-weather";
+    card.innerHTML = `<h2>🌤 Weather</h2><p>${icon} ${weather}</p><p>🌡 ${temp}°F</p>`;
+    scrollView.appendChild(card);
 }
 
+// ─── Update crime card ──────────────────────────────────────────
+function updateCrime(crimeData) {
+    const scrollView = document.getElementsByClassName("scroll-view")[0];
 
+    const total = crimeData.total;
+    const incidents = crimeData.incidents || {};
+    const date = crimeData.date || "Yesterday";
 
+    let itemsHTML = "";
+    const sorted = Object.entries(incidents).sort((a, b) => b[1] - a[1]);
+    for (const [type, count] of sorted) {
+        itemsHTML += `
+            <div class="crime-item">
+                <span>${type}</span>
+                <span class="crime-count">${count}</span>
+            </div>`;
+    }
 
+    if (!itemsHTML) {
+        itemsHTML = `<p style="color:var(--muted);font-size:0.82rem;">No incidents reported</p>`;
+    }
+
+    const html = `
+        <h2>🚨 Crime — ${date}</h2>
+        <div class="crime-total">${total === -1 ? "—" : total} <span style="font-size:0.7rem;color:var(--muted);font-weight:400;">incidents</span></div>
+        ${itemsHTML}
+    `;
+
+    if (document.getElementsByClassName("data-card-crime").length > 0) {
+        document.getElementsByClassName("data-card-crime")[0].innerHTML = html;
+        return;
+    }
+
+    const card = document.createElement("div");
+    card.className = "data-card-crime";
+    card.innerHTML = html;
+    scrollView.appendChild(card);
+}
+
+// ─── Seed a default crime card on load ─────────────────────────
+// This shows the mock data from crime.py on startup
+window.addEventListener("DOMContentLoaded", () => {
+    updateCrime({
+        total: 12,
+        date: "Yesterday",
+        incidents: {
+            "Disturbance": 4,
+            "Vehicle Theft": 3,
+            "Burglary": 2,
+            "Suspicious Person": 2,
+            "Vandalism": 1
+        }
+    });
+});
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Modal logic
 //////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-const modal = document.getElementById('summary-modal');
+const modal       = document.getElementById('summary-modal');
 const summaryText = document.getElementById('summary-text');
 
-// Open
 document.getElementById('summary-btn').addEventListener('click', () => {
-  summaryText.textContent = latestSummary;
-  modal.classList.remove('hidden');
+    summaryText.textContent = latestSummary || "No summary available yet.";
+    modal.classList.remove('hidden');
 });
 
-// Close via X button
 document.getElementById('modal-close').addEventListener('click', () => {
-  modal.classList.add('hidden');
+    modal.classList.add('hidden');
 });
 
-// Close by clicking the dark overlay outside the box
 modal.addEventListener('click', (e) => {
-  if (e.target === modal) modal.classList.add('hidden');
+    if (e.target === modal) modal.classList.add('hidden');
 });
 
-// Close with Escape key
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') modal.classList.add('hidden');
+    if (e.key === 'Escape') modal.classList.add('hidden');
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 init();

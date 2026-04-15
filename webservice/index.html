@@ -1,52 +1,60 @@
 <!DOCTYPE html>
 <html>
-
     <head>
         <title>PiWatch</title>
         <link rel="stylesheet" href="styles.css"/>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
         <script src="client.js" defer></script>
+        <meta charset="UTF-8">
     </head>
-
     <body>
-        
+        <div class="bg-grid"></div>
+
         <header>
-            <h1>PiWatch</h1>
-            <h2>Your School Monitoring System</h2>
-            
-            <div class="scroll-view">
-                <!-- Will scroll horizontally data if there is more than certian column length -->
-                <!-- Display imporant data like weather, traffic levels, and crime activity -->
-                 
+            <div class="logo-area">
+                <div class="logo-icon">📡</div>
+                <div>
+                    <h1>PiWatch</h1>
+                    <p class="tagline">SDSU Area Monitoring System</p>
+                </div>
+            </div>
+            <div class="status-bar">
+                <span class="status-dot"></span>
+                <span class="status-text">LIVE</span>
             </div>
 
+            <div class="scroll-view">
+                <!-- Cards injected by JS -->
+            </div>
         </header>
 
         <main>
-            <div class="chat-room">
-                <!-- Display a chat box for students to talk about things going on aroung campus -->
-                <div class="chat-box">
-                    
+            <div class="chat-wrapper">
+                <div class="chat-header">
+                    <span>💬 Campus Chat</span>
+                    <span class="chat-live-dot"></span>
                 </div>
-                <form class="chat-input">
-                    <input type="text" placeholder="Start chatting here..."/>
-                </form>
+                <div class="chat-room">
+                    <div class="chat-box"></div>
+                    <form class="chat-input">
+                        <input type="text" placeholder="Message the campus..."/>
+                        <button type="submit" class="send-btn">↑</button>
+                    </form>
+                </div>
             </div>
-            <button id="summary-btn">View Summary</button>
+            <button id="summary-btn">✦ View Chat Summary</button>
         </main>
-
 
         <div id="summary-modal" class="modal-overlay hidden">
             <div class="modal-box">
                 <div class="modal-header">
-                <h2>Chat Summary</h2>
-                <button id="modal-close">&times;</button>
+                    <h2>Chat Summary</h2>
+                    <button id="modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
-                <p id="summary-text">Loading...</p>
+                    <p id="summary-text">Loading...</p>
                 </div>
             </div>
         </div>
-
     </body>
-
 </html>
