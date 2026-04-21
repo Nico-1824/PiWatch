@@ -19,6 +19,14 @@ def get_weather():
     notify_weather(weather["weather"])
     return weather
 
+@app.route("/summarize", methods=["POST"])
+def summarize_chat():
+    data = request.get_json()
+    # print(json.dump(data, indent=4))
+    chatHistory = data["chat_history"]
+    summary = get_summary(chatHistory)
+    return {"summary": summary}
+
 def daily_crime_job():
     """
     Background thread that sends a crime digest every day at 8:00 AM.
@@ -38,6 +46,15 @@ def daily_crime_job():
 
         time.sleep(wait_seconds)
         notify_crime_summary()
+        
+
+@app.route('/health')
+def health():
+    return {"status": "ok"}, 200
+  
+  
+  
+  
 
 if __name__ == "__main__":
     from datetime import datetime

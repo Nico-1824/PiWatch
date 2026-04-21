@@ -13,7 +13,7 @@ function init() {
         wsClient.close();
     }
 
-    const URL = 'ws://localhost:5500';
+    const URL = `ws://${window.location.hostname}:5500`;
     wsClient = new WebSocket(URL);
 
     wsClient.onopen = () => {
