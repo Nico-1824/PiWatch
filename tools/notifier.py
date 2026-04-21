@@ -100,15 +100,55 @@ def notify_traffic(traffic_index):
     if _send_email(subject, body):
         last_sent["traffic"] = datetime.now()
 
+def notify_crime_summary():
+    """Send a daily digest email of yesterday's crime activity near SDSU."""
+    from crime import get_crime_summary
+
+    print("Generating daily crime digest...")
+    summary = get_crime_summary()
+
+    if summary["total"] == -1:
+        print("Crime data unavailable, skipping email.")
+        return
+
+    # Build the breakdown lines sorted by count descending
+    lines = ""
+    for call_type, count in sorted(
+        summary["incidents"].items(), key=lambda x: x[1], reverse=True
+    ):
+        lines += f"  {call_type}: {count}\n"
+
+    if not lines:
+        lines = "  No incidents reported in this area.\n"
+
+    subject = f"PiWatch Daily Crime Digest — SDSU Area ({summary['date']})"
+    body = (
+        f"Hi,\n\n"
+        f"Here is your PiWatch daily crime summary for the SDSU / College Area\n"
+        f"for {summary['date']}:\n\n"
+        f"  Total Incidents: {summary['total']}\n\n"
+        f"Breakdown by incident type:\n"
+        f"{lines}\n"
+        f"This covers SDPD beats surrounding SDSU, College Area, and the\n"
+        f"La Mesa border. Data sourced from the San Diego Police Department\n"
+        f"Open Data Portal.\n\n"
+        f"- PiWatch Alerts\n"
+        f"Generated at: {summary['as_of']}"
+    )
+
+    _send_email(subject, body)
+
 def send_startup_report():
     """Send an immediate status email when PiWatch first starts up."""
     from weather import getWeather
     from traffic import check_traffic
+    from crime import get_crime_summary
 
     print("PiWatch starting up, sending initial status report...")
 
     weather_data = getWeather()
     traffic_index = check_traffic()
+    crime_data = get_crime_summary()
 
     traffic_labels = {
         -1: "Unavailable",
@@ -123,16 +163,39 @@ def send_startup_report():
     temp = weather_data.get("temp", "Unavailable")
     traffic_label = traffic_labels.get(traffic_index, "Unknown")
 
+    # Build crime breakdown lines
+    crime_lines = ""
+    for call_type, count in sorted(
+        crime_data.get("incidents", {}).items(), key=lambda x: x[1], reverse=True
+    ):
+        crime_lines += f"    {call_type}: {count}\n"
+    if not crime_lines:
+        crime_lines = "    No incidents reported.\n"
+
+    crime_total = crime_data.get("total", -1)
+    crime_date = crime_data.get("date", "Unavailable")
+    crime_summary_text = (
+        f"  Total Incidents ({crime_date}): {crime_total}\n"
+        f"{crime_lines}"
+        if crime_total != -1
+        else "  Crime data unavailable.\n"
+    )
+
     subject = "PiWatch is Online — Current Status Report"
     body = (
         f"Hi,\n\n"
         f"PiWatch has just started up. Here is your current status report:\n\n"
-        f"  Weather: {weather}\n"
-        f"  Temperature: {temp}°F\n"
-        f"  Traffic: {traffic_label}\n\n"
+        f"--- WEATHER ---\n"
+        f"  Conditions: {weather}\n"
+        f"  Temperature: {temp}°F\n\n"
+        f"--- TRAFFIC ---\n"
+        f"  Level: {traffic_label}\n\n"
+        f"--- CRIME (Yesterday near SDSU) ---\n"
+        f"{crime_summary_text}\n"
         f"You will receive alerts when conditions change.\n"
         f"  - Rain/Thunderstorm/Drizzle will trigger a weather alert\n"
         f"  - Moderate traffic or worse will trigger a traffic alert\n"
+        f"  - A daily crime digest will be sent every morning at 8:00 AM\n"
         f"  - Alerts have a 2 hour cooldown to avoid spam\n\n"
         f"- PiWatch Alerts\n"
         f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
