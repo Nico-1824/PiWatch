@@ -1,4 +1,4 @@
-FROM python:latest AS build
+FROM python:3.11-slim AS build
 WORKDIR /app
 COPY . .
 

@@ -27,6 +27,10 @@ def summarize_chat():
     summary = get_summary(chatHistory)
     return {"summary": summary}
 
+@app.route('/health')
+def health():
+    return {"status": "ok"}, 200
+
 
 
 
