@@ -11,7 +11,7 @@ const WebSocket = require('ws');
 const PORT = 5500;
 
 // Use 127.0.0.1 when running without Docker, flask when running with Docker
-const FLASK_HOST = process.env.FLASK_HOST || "127.0.0.1";
+const FLASK_HOST = "flask";
 
 const server = http.createServer((req, res) => {
     try {
