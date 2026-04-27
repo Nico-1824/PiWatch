@@ -4,6 +4,7 @@
   "description": "To run with Docker:",
   "main": "index.js",
   "dependencies": {
+    "express": "^5.2.1",
     "json": "^11.0.0",
     "ws": "^8.19.0"
   },

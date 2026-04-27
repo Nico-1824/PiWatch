@@ -1,6 +1,7 @@
+let latestSummary = "";
+
 // This will be the client websocket recieving from the server
 let wsClient;
-let latestSummary = "";
 
 //////////////////////////
 // INIT FUNCTION TO START THE WEBSOCKET
@@ -213,7 +214,7 @@ window.addEventListener("DOMContentLoaded", () => {
 //////////////////////////////////////////////////////////////////////////////////////
 // Modal logic
 //////////////////////////////////////////////////////////////////////////////////////
-const modal       = document.getElementById('summary-modal');
+const modal = document.getElementById('summary-modal');
 const summaryText = document.getElementById('summary-text');
 
 document.getElementById('summary-btn').addEventListener('click', () => {
